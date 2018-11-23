@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="Virtualization.Calendar.CalendarPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:Virtualization.Calendar"
+             xmlns:s="clr-namespace:Info.Controls;assembly=Info"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" >
+    <UserControl.Resources>
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <RelativeSource Mode="FindAncestor" AncestorType="{x:Type c:CalendarPanel}" x:Key="ParentSource" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <c:DateLinePanel Height="30" BeginDate="{Binding ElementName=crC, Path=StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         EndDate="{Binding ElementName=crC, Path=EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShowDatePanel, Converter={StaticResource BooleanToVisibilityConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+
+        <s:ScrollViewInfo x:Name="scrollVH" Grid.Row="1" CanContentScroll="True" ScrollColor="{Binding RelativeSource={StaticResource ParentSource}, Path=ScrollColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          RowCount="{Binding ElementName=crC, Path=RowCountMax, UpdateSourceTrigger=PropertyChanged}" 
+                          TopMarging="{Binding RelativeSource={StaticResource ParentSource}, Path=TopMarging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                          LeftMarging="{Binding RelativeSource={StaticResource ParentSource}, Path=LeftMarging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ColumnCount="{Binding ElementName=crC, Path=ColumnCountMax, UpdateSourceTrigger=PropertyChanged}"
+                          HorizontalDataSource="{Binding ElementName=crC, Path=Matrix, UpdateSourceTrigger=PropertyChanged}" 
+                          VerticalDataSource="{Binding ElementName=crC, Path=Matrix, UpdateSourceTrigger=PropertyChanged}"
+                          HorisontalSizeItems="{Binding RelativeSource={StaticResource ParentSource}, Path=HorisontalSizeItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          VerticalSizeItems="{Binding RelativeSource={StaticResource ParentSource}, Path=VerticalSizeItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" 
+                          IsHorizontalShowMoreInfo="{Binding RelativeSource={StaticResource ParentSource}, Path=IsHorizontalShowMoreInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          IsVerticalShowMoreInfo="{Binding RelativeSource={StaticResource ParentSource}, Path=IsVerticalShowMoreInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <c:CalendarControl x:Name="crC" LeftTopAreaTemplate="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=LeftTopAreaTemplate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               DataSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=DataSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupWidth="100"
+                               
+                               RowLineColor="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=RowLineColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ColumnLineColor="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=ColumnLineColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
+                               StartDate="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               EndDate="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
+                               SelectedData="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
+                               SelectedItem="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               SelectedRow="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedRow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               SelectedColumn="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedColumn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
+                               SelectedIndex="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               SelectedRowIndex="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedRowIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               SelectedColumnIndex="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedColumnIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                               
+                               SelectedDataInGroup="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedDataInGroup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               >
+                <c:CalendarControl.DataItemTemplate>
+                    <DataTemplate DataType="local:SampleGridItem">
+                        <!-- Cell template -->
+                        <Border Background="LightBlue" BorderBrush="Blue" BorderThickness="1" >
+                            <TextBlock TextAlignment="Center" Text="{Binding Path=.}" VerticalAlignment="Center"/>
+                            <Border.ToolTip>
+                                <TextBlock TextAlignment="Center" Text="{Binding Path=.}" VerticalAlignment="Center" />
+                            </Border.ToolTip>
+                        </Border>
+                    </DataTemplate>
+                </c:CalendarControl.DataItemTemplate>
+
+                <!-- Wait layer template -->
+                <c:CalendarControl.WaitLayerTemplate>
+                    <ControlTemplate>
+                        <Grid Background="LightGray" Cursor="Wait">
+                            <ProgressBar HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="20" IsIndeterminate="True" />
+                        </Grid>
+                    </ControlTemplate>
+                </c:CalendarControl.WaitLayerTemplate>
+            </c:CalendarControl>
+        </s:ScrollViewInfo>
+        
+        <ContentControl Grid.Row="2" DataContext="{Binding RelativeSource={StaticResource ParentSource}}" ContentTemplate="{Binding Path=FooterTemplate}" Content="{Binding ElementName=crC}" />
+    </Grid>
+</UserControl>

@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="Virtualization.Calendar.DateLinePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Virtualization.Calendar"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="800">
+    <UserControl.Resources>
+        <RelativeSource x:Key="ParentSource" Mode="FindAncestor" AncestorType="{x:Type UserControl}" />
+
+        <Style  TargetType="{x:Type DatePickerTextBox}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=rbYear}" Value="True">
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <TextBox x:Name="PART_TextBox" Text="{Binding Path=SelectedDate, StringFormat='yyyy', 
+                           RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}" >
+                                </TextBox>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=rbMonth}" Value="True">
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <TextBox x:Name="PART_TextBox" Text="{Binding Path=SelectedDate, StringFormat='MMMM', 
+                           RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}" >
+                                </TextBox>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=rbDate}" Value="True">
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <TextBox x:Name="PART_TextBox" Text="{Binding Path=SelectedDate, StringFormat='dd', 
+                           RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}" >
+                                </TextBox>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter1" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <ComboBox Width="150" ItemsSource="{Binding RelativeSource={StaticResource ParentSource}, Path=Years}" SelectedValue="{Binding RelativeSource={StaticResource ParentSource}, Path=Year, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxDropDownHeight="100"
+                      Visibility="{Binding RelativeSource={StaticResource ParentSource}, Path=IsMonthPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter1}}"/>
+            <ComboBox Width="150" ItemsSource="{Binding RelativeSource={StaticResource ParentSource}, Path=Months}" DisplayMemberPath="Item2" SelectedValuePath="Item1" SelectedValue="{Binding RelativeSource={StaticResource ParentSource}, Path=Month, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxDropDownHeight="100"
+                      Visibility="{Binding RelativeSource={StaticResource ParentSource}, Path=IsMonthPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter1}}"/>
+
+            <ComboBox Width="150" ItemsSource="{Binding RelativeSource={StaticResource ParentSource}, Path=FifteenDaysList}" DisplayMemberPath="Item2" SelectedValuePath="Item1" SelectedValue="{Binding RelativeSource={StaticResource ParentSource}, Path=FifteenDaysRang, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxDropDownHeight="100" 
+                      Visibility="{Binding RelativeSource={StaticResource ParentSource}, Path=FifteenPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter1}}"/>
+
+            <StackPanel Orientation="Horizontal"
+                        Visibility="{Binding RelativeSource={StaticResource ParentSource}, Path=IsWeekPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter1}}">
+
+                <Button Content="-" Width="50" Click="Minus_Click" />
+
+                <DatePicker Grid.Column="3" Width="100" SelectedDate="{Binding RelativeSource={StaticResource ParentSource}, Path=BeginDate, UpdateSourceTrigger=PropertyChanged}" 
+                            DisplayDateEnd="{Binding RelativeSource={StaticResource ParentSource}, Path=EndDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            DisplayDateStart="{Binding RelativeSource={StaticResource ParentSource}, Path=MinDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <TextBlock Grid.Column="4" VerticalAlignment="Center" Text=" - " />
+
+                <DatePicker Grid.Column="5" Width="100" SelectedDate="{Binding RelativeSource={StaticResource ParentSource}, Path=EndDate}" 
+                            DisplayDateStart="{Binding RelativeSource={StaticResource ParentSource}, Path=BeginDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            DisplayDateEnd="{Binding RelativeSource={StaticResource ParentSource}, Path=MaxDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Button Grid.Column="2" Content="+" Width="50" Click="Plus_Click" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="3" Orientation="Horizontal">
+            <ToggleButton Content="Период" Width="100" IsChecked="{Binding RelativeSource={StaticResource ParentSource}, Path=IsWeekPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="3" />
+            <ToggleButton Content="Месяц" Width="100" IsChecked="{Binding RelativeSource={StaticResource ParentSource}, Path=IsMonthPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="3" />
+            <ToggleButton Content="Пол месяца" Width="100" IsChecked="{Binding RelativeSource={StaticResource ParentSource}, Path=FifteenPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="3"
+                          Visibility="{Binding RelativeSource={StaticResource ParentSource}, Path=IsMonthPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter1}}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
