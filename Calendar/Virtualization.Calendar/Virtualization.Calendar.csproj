@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Info">
+      <HintPath>..\..\Info.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -78,10 +81,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Info\Info\Info.csproj">
-      <Project>{6441a34d-a7d1-4bbb-9c3e-9af45b1b1aa1}</Project>
-      <Name>Info</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Virtualization\Virtualization.csproj">
       <Project>{0f2208a0-825a-4d16-9b3e-18ef65c2b377}</Project>
       <Name>Virtualization</Name>
