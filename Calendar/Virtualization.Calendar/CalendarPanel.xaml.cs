@@ -63,6 +63,10 @@ namespace Virtualization.Calendar
         }
 
         #region Dependency property
+        public static readonly DependencyProperty SelectionTypeProperty = DependencyProperty.Register("SelectionType", typeof(SelectionType), typeof(CalendarControl), new PropertyMetadata(SelectionType.Single));
+
+        public static readonly DependencyProperty SelectedValuesProperty = DependencyProperty.Register("SelectedValues", typeof(IEnumerable<EmptySelection>), typeof(CalendarPanel), new PropertyMetadata(null));
+
         public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register("SelectedItem", typeof(object), typeof(CalendarPanel), new PropertyMetadata(null));
         public static readonly DependencyProperty SelectedColumnProperty = DependencyProperty.Register("SelectedRow", typeof(object), typeof(CalendarPanel), new PropertyMetadata(null));
         public static readonly DependencyProperty SelectedRowProperty = DependencyProperty.Register("SelectedColumn", typeof(object), typeof(CalendarPanel), new PropertyMetadata(null));
@@ -111,6 +115,11 @@ namespace Virtualization.Calendar
         public static readonly DependencyProperty SelectedDataInGroupProperty = DependencyProperty.Register("SelectedDataInGroup", typeof(object), typeof(CalendarPanel), new PropertyMetadata(null));
 
         public static readonly DependencyProperty FooterTemplateProperty = DependencyProperty.Register("FooterTemplate", typeof(DataTemplate), typeof(CalendarPanel), new PropertyMetadata(null));
+
+
+        public SelectionType SelectionType { get { return (SelectionType)this.GetValue(SelectionTypeProperty); } set { this.SetValue(SelectionTypeProperty, value); } }
+
+        public IEnumerable<EmptySelection> SelectedValues { get { return (IEnumerable<EmptySelection>)this.GetValue(SelectedValuesProperty); } set { this.SetValue(SelectedValuesProperty, value); } }
 
 
         public object SelectedItem { get { return this.GetValue(SelectedItemProperty); } set { this.SetValue(SelectedItemProperty, value); } }
@@ -419,6 +428,10 @@ namespace Virtualization.Calendar
 
         public void Remove(object item) {
             crC.RemoveItem(item);
+        }
+
+        public Tuple<object, object, IEnumerable<object>> Select(object start, object end) {
+            return crC.SelectItems(start, end);
         }
         #endregion
     }

@@ -8,10 +8,12 @@ namespace Virtualization.Delegate
 {
     public class SelectionValueEventArgs : RoutedEventArgs {
 
-        public SelectionValueEventArgs(RoutedEvent id, object value, TypeValue type, SelectInfo row, SelectInfo column, bool isGroup, IEnumerable<object> itemInGroup) {
+        public SelectionValueEventArgs(RoutedEvent id, object value, object lastValue, object currentValue, TypeValue type, SelectInfo row, SelectInfo column, bool isGroup, IEnumerable<object> itemInGroup) {
             RoutedEvent = id ?? throw new ArgumentNullException("id");
 
             this._selectedValue = value;
+            this._lastValue = lastValue;
+            this._currentValue = currentValue;
             this._selectedRow = row;
             this._selectedColumn = column;
             this._type = type;
@@ -21,6 +23,16 @@ namespace Virtualization.Delegate
         }
 
         #region Property
+        private readonly object _lastValue;
+        public object LastValue {
+            get { return _lastValue; }
+        }
+
+        private readonly object _currentValue;
+        public object CurrentValue {
+            get { return _currentValue; }
+        }
+
         private readonly object _selectedValue;
         public object SelectedValue {
             get { return _selectedValue; }
@@ -60,7 +72,7 @@ namespace Virtualization.Delegate
     }
 
     public enum TypeValue {
-        Item, Row, Column
+        Item, Items, Row, Column
     }
 
     public enum TypeSelection {
@@ -78,5 +90,20 @@ namespace Virtualization.Delegate
         public object Content { get; private set; }
 
         public int Step { get; private set; }
+    }
+
+    public struct EmptySelection {
+
+        public EmptySelection(SelectInfo column, SelectInfo row, object content) {
+            Column = column;
+            Row = row;
+            Content = content;
+        }
+
+        public SelectInfo Column { get; private set; }
+
+        public SelectInfo Row { get; private set; }
+
+        public object Content { get; private set; }
     }
 }

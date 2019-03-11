@@ -274,8 +274,12 @@ namespace Test.WPF
 
         private void crC_SelectionRighctClickChangedEvent(object sender, Virtualization.Delegate.SelectionValueEventArgs args)
         {
-            if (args.SelectedValue == null)
-                MessageBox.Show("RightClick -> " + args.SelectedValue + " [" + args.SelectedRow.Content + " |" + args.SelectedRow.Step + "|" + ", " + args.SelectedColumn.Content + " |" + args.SelectedColumn.Step + "|" + "] ");
+            if (args.SelectedValue == null) {
+                Console.WriteLine(args.LastValue);
+                Console.WriteLine(args.CurrentValue);
+                Console.WriteLine(crC.Select(args.LastValue, args.CurrentValue));
+            }
+                //MessageBox.Show("RightClick -> " + args.SelectedValue + " [" + args.SelectedRow.Content + " |" + args.SelectedRow.Step + "|" + ", " + args.SelectedColumn.Content + " |" + args.SelectedColumn.Step + "|" + "] ");
         }
 
         private void crC_SelectionMiddleClickChanged(object sender, Virtualization.Delegate.SelectionValueEventArgs args)
@@ -306,6 +310,12 @@ namespace Test.WPF
         {
             if (crC.SelectedData != null)
                 crC.Remove(crC.SelectedData);
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (crC.SelectedValues != null)
+                MessageBox.Show(crC.SelectedValues.ToArray()[0].Column.Content.ToString() + " " + crC.SelectedValues.ToArray()[0].Row.Content.ToString() + " " + crC.SelectedValues.ToArray()[0].Column.Step.ToString() + " " + crC.SelectedValues.ToArray()[0].Row.Step.ToString());
         }
     }
 }

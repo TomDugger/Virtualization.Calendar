@@ -75,7 +75,7 @@
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
         <c:CalendarPanel Name="crC" ItemWidth="30" GroupWidth="100" GroupHeight="30" DataSource="{Binding .}" IsHorizontalShowMoreInfo="True" IsVerticalShowMoreInfo="True"
-                         WaitLayerTemplate="{StaticResource WaitTemplate}" 
+                         WaitLayerTemplate="{StaticResource WaitTemplate}" SelectionType="Single"
                          HorisontalSizeItems="10" TopMarging="90" LeftMarging="200"
                          VerticalSizeItems="10" ScrollColor="DimGray" 
                          ColumnLineColor="DimGray" RowLineColor="Black" SelectionChanged="crC_SelectionChanged" SelectionDoubleClickChanged="crC_SelectionDoubleClickChangedEvent" SelectionRighctClickChanged="crC_SelectionRighctClickChangedEvent" SelectionMiddleClickChanged="crC_SelectionMiddleClickChanged">
@@ -143,6 +143,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
@@ -154,6 +155,8 @@
 
                         <Button Content="Add" Grid.Row="1" Click="Button_Click" />
                         <Button Content="Remove" Grid.Row="1" Grid.Column="1" Click="Button_Click_1" />
+
+                        <Button Grid.Row="2" Grid.ColumnSpan="2" Content="over" Click="Button_Click_2" />
                     </Grid>
                 </DataTemplate>
             </c:CalendarPanel.LeftTopAreaTemplate>

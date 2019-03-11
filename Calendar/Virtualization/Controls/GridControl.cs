@@ -43,7 +43,7 @@ namespace Virtualization.Controls
             remove { RemoveHandler(SelectionMiddleClickChangedEvent, value); }
         }
 
-        protected void RaiseSelectionChanged(GridItem value, TypeValue type, TypeSelection selection = TypeSelection.Left, bool MetricGroup = false) {
+        protected void RaiseSelectionChanged(GridItem value, GridItem lastValue, TypeValue type, TypeSelection selection = TypeSelection.Left, bool MetricGroup = false) {
 
             SelectInfo row = new SelectInfo();
             SelectInfo column = new SelectInfo();
@@ -111,16 +111,16 @@ namespace Virtualization.Controls
             switch (selection)
             {
                 case TypeSelection.Left:
-                    args = new SelectionValueEventArgs(GridControl.SelectionChangedEvent, value.Content, type, row, column, isGroup, items);
+                    args = new SelectionValueEventArgs(GridControl.SelectionChangedEvent, value.Content, lastValue, value, type, row, column, isGroup, items);
                     break;
                 case TypeSelection.Double:
-                    args = new SelectionValueEventArgs(GridControl.SelectionDoubleClickChangedEvent, value.Content, type, row, column, isGroup, items);
+                    args = new SelectionValueEventArgs(GridControl.SelectionDoubleClickChangedEvent, value.Content, lastValue, value, type, row, column, isGroup, items);
                     break;
                 case TypeSelection.Right:
-                    args = new SelectionValueEventArgs(GridControl.SelectionRighctClickChangedEvent, value.Content, type, row, column, isGroup, items);
+                    args = new SelectionValueEventArgs(GridControl.SelectionRighctClickChangedEvent, value.Content, lastValue, value, type, row, column, isGroup, items);
                     break;
                 case TypeSelection.Middle:
-                    args = new SelectionValueEventArgs(GridControl.SelectionMiddleClickChangedEvent, value.Content, type, row, column, isGroup, items);
+                    args = new SelectionValueEventArgs(GridControl.SelectionMiddleClickChangedEvent, value.Content, lastValue, value, type, row, column, isGroup, items);
                     break;
             }
             RaiseEvent(args);
@@ -139,8 +139,16 @@ namespace Virtualization.Controls
             get {
                 return _mouseSelectCommand ?? (_mouseSelectCommand = new Command(obj =>
                 {
+                    foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
+                        i.IsSelected = false;
+
+                    GridItem last = null;
+                    // && SelectionType == SelectionType.Single
                     if (SelectedItem != null)
+                    {
                         ((GridItem)SelectedItem).IsSelected = false;
+                        last = (GridItem)SelectedItem;
+                    }
 
                     if (SelectedRow != null)
                         ((GridItem)SelectedRow).IsSelected = false;
@@ -151,18 +159,53 @@ namespace Virtualization.Controls
                     if (obj is GridDataItem item)
                     {
                         var index = this.DataItems.ToList().IndexOf(item);
-                        if (index != SelectedIndex) {
-                            SelectedIndex = this.DataItems.ToList().IndexOf(item);
-                            item.IsSelected = true;
-                            SelectedItem = item;
-                            SelectedData = item.Content;
-                        }
-                        else {
-                            SelectedIndex = -1;
-                            (SelectedItem as GridDataItem).IsSelected = false;
-                            SelectedItem = null;
-                            SelectedData = null;
-                        }
+                        //if (SelectionType == SelectionType.Single)
+                        //{
+                            if (index != SelectedIndex)
+                            {
+                                SelectedIndex = this.DataItems.ToList().IndexOf(item);
+                                item.IsSelected = true;
+                                SelectedItem = item;
+                                SelectedData = item.Content;
+                            }
+                            else
+                            {
+                                SelectedIndex = -1;
+                                (SelectedItem as GridDataItem).IsSelected = false;
+                                SelectedItem = null;
+                                SelectedData = null;
+                            }
+                        //}
+                        //else {
+                        //    item.IsSelected = !item.IsSelected;
+                        //    List<EmptySelection> temp = new List<EmptySelection>();
+
+                        //    if (SelectedValues != null)
+                        //        temp = new List<EmptySelection>(SelectedValues);
+
+
+                        //    if (item.IsSelected)
+                        //    {
+                        //        SelectInfo row = new SelectInfo();
+                        //        SelectInfo column = new SelectInfo();
+
+                        //        var rrow = this.GridRowHeaders.FirstOrDefault(x => x.Row <= item.Row && item.Row < x.Row + x.RowSpan);
+                        //        var rcolumn = this.GridColumnHeaders.FirstOrDefault(x => x.Column <= item.Column && item.Column < x.Column + x.ColumnSpan);
+
+                        //        if (rrow != null)
+                        //            row = new SelectInfo(rrow.Content, (rrow.Row - item.Row) * -1);
+
+                        //        if (rcolumn != null)
+                        //            column = new SelectInfo(rcolumn.Content, (rcolumn.Column - item.Column) * -1);
+
+                        //        temp.Add(new EmptySelection(column, row, item));
+                        //    }
+                        //    else
+                        //    {
+                        //        temp.Remove(temp.FirstOrDefault(x => ((EmptySelection)x).Content == item));
+                        //    }
+                        //    SelectedValues = temp.Count == 0 ? null : temp.ToArray();
+                        //}
 
                         SelectedRowIndex = -1;
                         SelectedColumnIndex = -1;
@@ -179,11 +222,17 @@ namespace Virtualization.Controls
                             tmpc.IsSelected = false;
                             SelectedColumn = null;
                         }
-
-                        RaiseSelectionChanged(item, TypeValue.Item, MetricGroup: item.Content == null);
+                        //if (SelectionType == SelectionType.Single)
+                            RaiseSelectionChanged(item, last, TypeValue.Item, MetricGroup: item.Content == null);
+                        //else
+                        //    RaiseSelectionChanged(item, last, TypeValue.Items, MetricGroup: item.Content == null);
                     }
-                    else if (obj is GridRowHeader row)
-                    {
+                    else if (obj is GridRowHeader row) {
+                        if (SelectedValues != null) {
+                            foreach (var r in SelectedValues) ((GridDataItem)((EmptySelection)r).Content).IsSelected = false;
+                            SelectedValues = null;
+                        }
+
                         var index = this.GridRowHeaders.ToList().IndexOf(row);
                         if (index != SelectedRowIndex)
                         {
@@ -219,9 +268,15 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(row, TypeValue.Row);
+                        RaiseSelectionChanged(row, null, TypeValue.Row);
                     }
                     else if (obj is GridColumnHeader column) {
+
+                        if (SelectedValues != null)
+                        {
+                            foreach (var r in SelectedValues) ((GridDataItem)((EmptySelection)r).Content).IsSelected = false;
+                            SelectedValues = null;
+                        }
 
                         var index = this.GridColumnHeaders.ToList().IndexOf(column);
                         if (index != SelectedColumnIndex) {
@@ -256,7 +311,7 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(column, TypeValue.Column);
+                        RaiseSelectionChanged(column, null, TypeValue.Column);
                     }
                 }, obj => obj != null));
             }
@@ -267,17 +322,20 @@ namespace Virtualization.Controls
             get {
                 return _mouseDoubleClickCommand ?? (_mouseDoubleClickCommand = new Command(obj =>
                 {
+                    foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
+                        i.IsSelected = false;
+
                     if (obj is GridDataItem item)
                     {
-                        RaiseSelectionChanged(item, TypeValue.Item, TypeSelection.Double, item.Content == null);
+                        RaiseSelectionChanged(item, null, TypeValue.Item, TypeSelection.Double, item.Content == null);
                     }
                     else if (obj is GridRowHeader row)
                     {
-                        RaiseSelectionChanged(row, TypeValue.Row, TypeSelection.Double);
+                        RaiseSelectionChanged(row, null, TypeValue.Row, TypeSelection.Double);
                     }
                     else if (obj is GridColumnHeader column)
                     {
-                        RaiseSelectionChanged(column, TypeValue.Column, TypeSelection.Double);
+                        RaiseSelectionChanged(column, null, TypeValue.Column, TypeSelection.Double);
                     }
                 }, obj => obj != null));
             }
@@ -288,8 +346,15 @@ namespace Virtualization.Controls
             get {
                 return _mouseRightClickCommand ?? (_mouseRightClickCommand = new Command(obj =>
                 {
+                    foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
+                        i.IsSelected = false;
+                    GridItem last = null;
+
                     if (SelectedItem != null)
+                    {
                         ((GridItem)SelectedItem).IsSelected = false;
+                        last = (GridItem)SelectedItem;
+                    }
 
                     if (SelectedRow != null)
                         ((GridItem)SelectedRow).IsSelected = false;
@@ -331,7 +396,7 @@ namespace Virtualization.Controls
                             SelectedColumn = null;
                         }
 
-                        RaiseSelectionChanged(item, TypeValue.Item, TypeSelection.Right, item.Content == null);
+                        RaiseSelectionChanged(item, last, TypeValue.Item, TypeSelection.Right, item.Content == null);
                     }
                     else if (obj is GridRowHeader row)
                     {
@@ -371,7 +436,7 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(row, TypeValue.Row, TypeSelection.Right);
+                        RaiseSelectionChanged(row, null, TypeValue.Row, TypeSelection.Right);
                     }
                     else if (obj is GridColumnHeader column)
                     {
@@ -413,7 +478,7 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(column, TypeValue.Column, TypeSelection.Right);
+                        RaiseSelectionChanged(column, null, TypeValue.Column, TypeSelection.Right);
                     }
                 }, obj => obj != null));
             }
@@ -424,8 +489,14 @@ namespace Virtualization.Controls
             get {
                 return _mouseMiddleClickCommand ?? (_mouseMiddleClickCommand = new Command(obj =>
                 {
+                    foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
+                        i.IsSelected = false;
+                    GridItem last = null;
                     if (SelectedItem != null)
+                    {
                         ((GridItem)SelectedItem).IsSelected = false;
+                        last = (GridItem)SelectedItem;
+                    }
 
                     if (SelectedRow != null)
                         ((GridItem)SelectedRow).IsSelected = false;
@@ -467,7 +538,7 @@ namespace Virtualization.Controls
                             SelectedColumn = null;
                         }
 
-                        RaiseSelectionChanged(item, TypeValue.Item, TypeSelection.Middle, item.Content == null);
+                        RaiseSelectionChanged(item, last, TypeValue.Item, TypeSelection.Middle, item.Content == null);
                     }
                     else if (obj is GridRowHeader row)
                     {
@@ -507,7 +578,7 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(row, TypeValue.Row, TypeSelection.Middle);
+                        RaiseSelectionChanged(row, null, TypeValue.Row, TypeSelection.Middle);
                     }
                     else if (obj is GridColumnHeader column)
                     {
@@ -549,7 +620,7 @@ namespace Virtualization.Controls
                         }
                         SelectedData = null;
 
-                        RaiseSelectionChanged(column, TypeValue.Column, TypeSelection.Middle);
+                        RaiseSelectionChanged(column, null, TypeValue.Column, TypeSelection.Middle);
                     }
                 }, obj => obj != null));
             }
@@ -606,6 +677,8 @@ namespace Virtualization.Controls
 
         public static readonly DependencyProperty ColumnHeaderTemplateSelectorProperty;
 
+        public static readonly DependencyProperty SelectionTypeProperty;
+
         public static readonly DependencyProperty DataSourceProperty;
 
         public static readonly DependencyProperty RowCountProperty;
@@ -657,6 +730,7 @@ namespace Virtualization.Controls
 
         private static readonly DependencyProperty SelectColorProperty;
 
+        public static readonly DependencyProperty SelectedValuesProperty;
         public static readonly DependencyProperty SelectedItemProperty;
         public static readonly DependencyProperty SelectedColumnProperty;
         public static readonly DependencyProperty SelectedRowProperty;
@@ -762,6 +836,10 @@ namespace Virtualization.Controls
         public Color SelectColor { get { return (Color)this.GetValue(SelectColorProperty); } set { this.SetValue(SelectColorProperty, value); } }
 
 
+        public SelectionType SelectionType { get { return (SelectionType)this.GetValue(SelectionTypeProperty); } set { this.SetValue(SelectionTypeProperty, value); } }
+
+        public IEnumerable<EmptySelection> SelectedValues { get { return (IEnumerable<EmptySelection>)this.GetValue(SelectedValuesProperty); } set { this.SetValue(SelectedValuesProperty, value); } }
+
         public object SelectedItem { get { return this.GetValue(SelectedItemProperty); } set { this.SetValue(SelectedItemProperty, value); } }
 
         public object SelectedRow { get { return this.GetValue(SelectedRowProperty); } set { this.SetValue(SelectedRowProperty, value); } }
@@ -819,7 +897,7 @@ namespace Virtualization.Controls
 
             GroupWidthProperty = DependencyProperty.Register("GroupWidth", typeof(double), typeof(GridControl), new PropertyMetadata(130.0));
             GroupHeightProperty = DependencyProperty.Register("GroupHeight", typeof(double), typeof(GridControl), new PropertyMetadata(35.0));
-
+            
             // Initialize readonly property keys
             ColumnCountKey = DependencyProperty.RegisterReadOnly("ColumnCount", typeof(int), typeof(GridControl), new PropertyMetadata(0));
             RowCountKey = DependencyProperty.RegisterReadOnly("RowCount", typeof(int), typeof(GridControl), new PropertyMetadata(0));
@@ -849,6 +927,9 @@ namespace Virtualization.Controls
             SelectColorProperty = DependencyProperty.Register("SelectColor", typeof(Color), typeof(GridControl), new PropertyMetadata(Colors.DodgerBlue));
 
             // Events
+            SelectionTypeProperty = DependencyProperty.Register("SelectionType", typeof(SelectionType), typeof(GridControl), new PropertyMetadata(SelectionType.Single));
+
+            SelectedValuesProperty = DependencyProperty.Register("SelectedValues", typeof(IEnumerable<EmptySelection>), typeof(GridControl), new PropertyMetadata(null));
             SelectedItemProperty = DependencyProperty.Register("SelectedItem", typeof(object), typeof(GridControl), new PropertyMetadata(null));
             SelectedRowProperty = DependencyProperty.Register("SelectedRow", typeof(object), typeof(GridControl), new PropertyMetadata(null));
             SelectedColumnProperty = DependencyProperty.Register("SelectedColumn", typeof(object), typeof(GridControl), new PropertyMetadata(null));
@@ -1579,6 +1660,37 @@ namespace Virtualization.Controls
             this.itemSourceCache[rowIndex, ColumnIndex] = null;
             this.itemMatrixCache[rowIndex, ColumnIndex] = Position.Default();
         }
+
+        public Tuple<object, object, IEnumerable<object>> SelectItems(object startItem, object endItem, bool clearSelection = true, bool clearAll = true) {
+            // отбираем нужные элементы и устанавливаем как выбранные
+            GridItem v1 = (GridItem)startItem;
+            GridItem v2 = (GridItem)endItem;
+
+            if (v1 == null || v2 == null) return null;
+
+            foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
+                i.IsSelected = false;
+            if (this.DataItems.Where(x => x.Content != null && (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column))).Count() != 0) return null;
+
+            var v = this.DataItems.FirstOrDefault(x => (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column)));
+
+            v.IsSelected = true;
+            v.RowSpan = Math.Max(v1.Row, v2.Row) - Math.Min(v1.Row, v2.Row) + 1;
+            v.ColumnSpan = Math.Max(v1.Column, v2.Column) - Math.Min(v1.Column, v2.Column) + 1;
+
+            if (clearSelection)
+            {
+                SelectedIndex = -1;
+                SelectedItem = null;
+                SelectedData = null;
+            }
+
+            var rrow1 = this.GridRowHeaders.Where(x => x.Row <= Math.Max(v1.Row, v2.Row) && Math.Min(v1.Row, v2.Row) < x.Row + x.RowSpan);
+            var rcolumn1 = this.GridColumnHeaders.Where(x => x.Column <= Math.Max(v1.Column, v2.Column) && Math.Min(v1.Column, v2.Column) < x.Column + x.ColumnSpan);
+
+            return new Tuple<object, object, IEnumerable<object>>(rcolumn1.First().Content, rcolumn1.Last().Content, rrow1.ToArray());
+        }
+        
         #endregion
         #endregion
     }

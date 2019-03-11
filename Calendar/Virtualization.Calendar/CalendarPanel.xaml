@@ -43,6 +43,10 @@
                                StartDate="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                EndDate="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                
+                               SelectionType="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectionType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
+                               SelectedValues="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedValues, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               
                                SelectedData="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                
                                SelectedItem="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

@@ -62,6 +62,7 @@
     <Compile Include="Models\GridRow.cs" />
     <Compile Include="Models\GridRowHeader.cs" />
     <Compile Include="Models\Position.cs" />
+    <Compile Include="Models\SelectionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
