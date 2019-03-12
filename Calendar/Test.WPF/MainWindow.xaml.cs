@@ -275,9 +275,16 @@ namespace Test.WPF
         private void crC_SelectionRighctClickChangedEvent(object sender, Virtualization.Delegate.SelectionValueEventArgs args)
         {
             if (args.SelectedValue == null) {
-                Console.WriteLine(args.LastValue);
-                Console.WriteLine(args.CurrentValue);
-                Console.WriteLine(crC.Select(args.LastValue, args.CurrentValue));
+                var r = crC.Select(args.LastValue, args.CurrentValue);
+                Console.WriteLine(r);
+                if(r != null && r.Item3 != null)
+                foreach (var t in r.Item3)
+                {
+                    Console.WriteLine(t.Item1.ToString() + " " + t.Item2.Count().ToString());
+                    foreach (var j in t.Item2)
+                        Console.Write(" " + j.ToString());
+                    Console.WriteLine();
+                }
             }
                 //MessageBox.Show("RightClick -> " + args.SelectedValue + " [" + args.SelectedRow.Content + " |" + args.SelectedRow.Step + "|" + ", " + args.SelectedColumn.Content + " |" + args.SelectedColumn.Step + "|" + "] ");
         }

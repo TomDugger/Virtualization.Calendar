@@ -142,6 +142,13 @@ namespace Virtualization.Controls
                     foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
                         i.IsSelected = false;
 
+                    if (lastValue != null)
+                    {
+                        lastValue.IsSelected = false;
+                        lastValue.RowSpan = 1;
+                        lastValue.ColumnSpan = 1;
+                    }
+
                     GridItem last = null;
                     // && SelectionType == SelectionType.Single
                     if (SelectedItem != null)
@@ -325,6 +332,13 @@ namespace Virtualization.Controls
                     foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
                         i.IsSelected = false;
 
+                    if (lastValue != null)
+                    {
+                        lastValue.IsSelected = false;
+                        lastValue.RowSpan = 1;
+                        lastValue.ColumnSpan = 1;
+                    }
+
                     if (obj is GridDataItem item)
                     {
                         RaiseSelectionChanged(item, null, TypeValue.Item, TypeSelection.Double, item.Content == null);
@@ -348,6 +362,14 @@ namespace Virtualization.Controls
                 {
                     foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
                         i.IsSelected = false;
+
+                    if (lastValue != null)
+                    {
+                        lastValue.IsSelected = false;
+                        lastValue.RowSpan = 1;
+                        lastValue.ColumnSpan = 1;
+                    }
+
                     GridItem last = null;
 
                     if (SelectedItem != null)
@@ -491,6 +513,14 @@ namespace Virtualization.Controls
                 {
                     foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
                         i.IsSelected = false;
+
+                    if (lastValue != null)
+                    {
+                        lastValue.IsSelected = false;
+                        lastValue.RowSpan = 1;
+                        lastValue.ColumnSpan = 1;
+                    }
+
                     GridItem last = null;
                     if (SelectedItem != null)
                     {
@@ -757,7 +787,9 @@ namespace Virtualization.Controls
         private int displayedColScrollOffset = -1;
 
         private bool updateDataSourceAgain;
-        
+
+        private GridItem lastValue = null;
+
         // Cache
         private KeyValuePair<object, Position>[] rowHeaderCache;
         private KeyValuePair<object, Position>[] colHeaderCache;
@@ -1661,7 +1693,7 @@ namespace Virtualization.Controls
             this.itemMatrixCache[rowIndex, ColumnIndex] = Position.Default();
         }
 
-        public Tuple<object, object, IEnumerable<object>> SelectItems(object startItem, object endItem, bool clearSelection = true, bool clearAll = true) {
+        public Tuple<DateTime, DateTime, IEnumerable<Tuple<object, IEnumerable<int>>>> SelectItems(object startItem, object endItem, bool clearSelection = true, bool clearAll = true) {
             // отбираем нужные элементы и устанавливаем как выбранные
             GridItem v1 = (GridItem)startItem;
             GridItem v2 = (GridItem)endItem;
@@ -1672,11 +1704,13 @@ namespace Virtualization.Controls
                 i.IsSelected = false;
             if (this.DataItems.Where(x => x.Content != null && (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column))).Count() != 0) return null;
 
-            var v = this.DataItems.FirstOrDefault(x => (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column)));
+            lastValue = this.DataItems.FirstOrDefault(x => (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column)));
 
-            v.IsSelected = true;
-            v.RowSpan = Math.Max(v1.Row, v2.Row) - Math.Min(v1.Row, v2.Row) + 1;
-            v.ColumnSpan = Math.Max(v1.Column, v2.Column) - Math.Min(v1.Column, v2.Column) + 1;
+            if (lastValue == null) return null;
+
+            lastValue.IsSelected = true;
+            lastValue.RowSpan = Math.Max(v1.Row, v2.Row) - Math.Min(v1.Row, v2.Row) + 1;
+            lastValue.ColumnSpan = Math.Max(v1.Column, v2.Column) - Math.Min(v1.Column, v2.Column) + 1;
 
             if (clearSelection)
             {
@@ -1685,10 +1719,20 @@ namespace Virtualization.Controls
                 SelectedData = null;
             }
 
-            var rrow1 = this.GridRowHeaders.Where(x => x.Row <= Math.Max(v1.Row, v2.Row) && Math.Min(v1.Row, v2.Row) < x.Row + x.RowSpan);
-            var rcolumn1 = this.GridColumnHeaders.Where(x => x.Column <= Math.Max(v1.Column, v2.Column) && Math.Min(v1.Column, v2.Column) < x.Column + x.ColumnSpan);
+            var rrow1 = this.GridRowHeaders.Where(x => x.Row <= Math.Max(v1.Row, v2.Row) && Math.Min(v1.Row, v2.Row) < x.Row + x.RowSpan && x.Column == 1);
+            var rcolumn1 = this.GridColumnHeaders.Where(x => x.Content is DateTime && x.Column <= Math.Max(v1.Column, v2.Column) && Math.Min(v1.Column, v2.Column) < x.Column + x.ColumnSpan);
 
-            return new Tuple<object, object, IEnumerable<object>>(rcolumn1.First().Content, rcolumn1.Last().Content, rrow1.ToArray());
+            var c1 = rcolumn1.First();
+            var c2 = rcolumn1.Last();
+
+            DateTime startDate = (DateTime)c1.Content;
+            DateTime endDate = (DateTime)c2.Content;
+            startDate = startDate.AddHours(24 / c1.ColumnSpan * (c1.Column - v1.Column) * -1);
+            endDate = endDate.AddHours(24 / c2.ColumnSpan * (c2.Column - v2.Column) * -1);
+
+            var result = rrow1.Select(x => new Tuple<object, IEnumerable<int>>(x.Content, Enumerable.Range((v1.Row >= x.Row && v1.Row <= x.Row + x.RowSpan ? (x.Row - v1.Row) * -1 : 0), (v2.Row >= x.Row && v2.Row <= x.Row + x.RowSpan ? (x.Row - v2.Row) * -1 + 1: x.RowSpan) - (v1.Row >= x.Row && v1.Row <= x.Row + x.RowSpan ? (x.Row - v1.Row) * -1 : 0))));
+
+            return new Tuple<DateTime, DateTime, IEnumerable<Tuple<object, IEnumerable<int>>>>(startDate, endDate, result);
         }
         
         #endregion

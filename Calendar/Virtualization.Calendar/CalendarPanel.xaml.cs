@@ -430,7 +430,7 @@ namespace Virtualization.Calendar
             crC.RemoveItem(item);
         }
 
-        public Tuple<object, object, IEnumerable<object>> Select(object start, object end) {
+        public Tuple<DateTime, DateTime, IEnumerable<Tuple<object, IEnumerable<int>>>> Select(object start, object end) {
             return crC.SelectItems(start, end);
         }
         #endregion
