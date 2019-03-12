@@ -1702,6 +1702,7 @@ namespace Virtualization.Controls
 
             foreach (var i in this.DataItems.Where(x => x.IsSelected == true))
                 i.IsSelected = false;
+
             if (this.DataItems.Where(x => x.Content != null && (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column))).Count() != 0) return null;
 
             lastValue = this.DataItems.FirstOrDefault(x => (x.Row >= Math.Min(v1.Row, v2.Row) && x.Row <= Math.Max(v1.Row, v2.Row)) && (x.Column >= Math.Min(v1.Column, v2.Column) && x.Column <= Math.Max(v1.Column, v2.Column)));
